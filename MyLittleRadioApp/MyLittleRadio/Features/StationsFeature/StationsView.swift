@@ -34,3 +34,12 @@ struct StationsView: View {
         }
     }
 }
+
+#if DEBUG
+#Preview {
+    let store = Store(initialState: StationsFeature.State()) {
+        StationsFeature()
+    }
+    StationsView(store: store)
+}
+#endif

@@ -24,7 +24,7 @@ extension ApiClient: DependencyKey {
 
 extension ApiClient: TestDependencyKey {
 
-    public static let previewValue = Self()
+    public static let previewValue = Self { [Station.sample()] }
     public static let testValue = Self()
 }
 
