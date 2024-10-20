@@ -36,7 +36,7 @@ struct Station: Codable, Equatable, Identifiable {
 }
 
 extension Station {
-    static func sample() -> Station {
+    static var sample: Station {
         Station(
             id: "7",
             brandId: "FIP",
