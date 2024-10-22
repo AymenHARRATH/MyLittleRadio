@@ -16,7 +16,7 @@ extension ApiClient: DependencyKey {
         let manager = ApiManager()
 
         return Self(
-            fetchStations: { await manager.fetchStations() }
+            fetchStations: { try await manager.fetchStations() }
         )
     }()
 }

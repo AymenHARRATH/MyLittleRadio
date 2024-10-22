@@ -8,8 +8,6 @@ struct StationsView: View {
 
     @Perception.Bindable private var store: StoreOf<StationsFeature>
 
-    @State var selectedStation: Station?
-
     init(store: StoreOf<StationsFeature>) {
         self.store = store
     }
@@ -20,15 +18,7 @@ struct StationsView: View {
                 ScrollView {
                     LazyVStack(alignment: .leading) {
                         ForEach(store.stations) { station in
-                            NavigationLink(state: StationDetailsFeature.State(station: station)) {
-                                HStack(spacing: 8) {
-                                    Text(station.title)
-                                    Spacer()
-                                    Image(systemName: "chevron.right")
-                                }
-                                .padding()
-                                .frame(height: 50)
-                            }
+                            stationCell(station)
                         }
                     }
                 }
@@ -40,6 +30,22 @@ struct StationsView: View {
         .task {
             store.send(.task)
         }
+        .alert($store.scope(state: \.alert, action: \.alert))
+    }
+}
+
+private extension StationsView {
+    func stationCell(_ station: Station) -> some View {
+        NavigationLink(state: StationDetailsFeature.State(station: station)) {
+            HStack(spacing: 8) {
+                Text(station.title)
+                Spacer()
+                Image(systemName: "chevron.right")
+            }
+            .padding()
+            .frame(height: 50)
+        }
+        .tint(.black)
     }
 }
 

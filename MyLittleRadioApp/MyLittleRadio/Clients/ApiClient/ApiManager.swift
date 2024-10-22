@@ -4,7 +4,7 @@ import Foundation
 
 final class ApiManager {
 
-    func fetchStations() async -> [Station] {
+    func fetchStations() async throws -> [Station] {
         do {
             guard let url =  URL(string: "http://localhost:3000/stations") else { return [] }
             let (data, _) = try await URLSession.shared.data(from: url)
@@ -12,7 +12,7 @@ final class ApiManager {
             return decodedData["stations"] ?? []
         }
         catch {
-            return []
+            throw(error)
         }
     }
 }
