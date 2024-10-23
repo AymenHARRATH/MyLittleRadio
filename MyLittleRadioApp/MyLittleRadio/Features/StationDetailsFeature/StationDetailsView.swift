@@ -20,16 +20,20 @@ struct StationDetailsView: View {
     var body: some View {
         WithPerceptionTracking {
             VStack {
-                VStack {
-                    coverImageView()
-                    stationTitleView()
-                    Spacer()
-                    playerView()
-                }
-                .padding([.top, .bottom], 50)
-                .frame(maxHeight: .infinity)
+                StationCoverImageView(
+                    squareImageUrl: store.station.assets?.squareImageUrl,
+                    color: Color(hex: store.station.colors.primary),
+                    text: store.station.shortTitle
+                )
+                .frame(width: 200, height: 200)
+                .shadow(radius: 5)
+                
+                stationTitleView()
+                Spacer()
+                playerView()
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .padding([.top, .bottom], 50)
+            .frame(maxWidth: .infinity)
             .background(
                 gradient()
             )

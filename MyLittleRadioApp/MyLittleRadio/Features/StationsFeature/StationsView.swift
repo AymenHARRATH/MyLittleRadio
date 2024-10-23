@@ -35,17 +35,35 @@ struct StationsView: View {
 }
 
 private extension StationsView {
+    @ViewBuilder
     func stationCell(_ station: Station) -> some View {
+        let color = Color(hex: station.colors.primary)
         NavigationLink(state: StationDetailsFeature.State(station: station)) {
-            HStack(spacing: 8) {
-                Text(station.title)
-                Spacer()
-                Image(systemName: "chevron.right")
+            ZStack {
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color.white)
+                    .shadow(color: color.opacity(0.2), radius: 10, x: 0, y: 5)
+                HStack(spacing: 8) {
+                    StationCoverImageView(
+                        squareImageUrl: station.assets?.squareImageUrl,
+                        color: color,
+                        text: station.shortTitle
+                    )
+                    .frame(width: 40, height: 40)
+                    Text(station.title)
+                        .foregroundColor(color)
+                    
+                    Spacer()
+                    
+                    Text(station.isMusical ? "🎵" : "🎙")
+                    Image(systemName: "chevron.right")
+                        .tint(color)
+                }
+                .padding(16)
             }
-            .padding()
-            .frame(height: 50)
+            .padding(.horizontal)
+            .frame(height: 70)
         }
-        .tint(.black)
     }
 }
 
