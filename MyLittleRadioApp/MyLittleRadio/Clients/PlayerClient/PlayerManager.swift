@@ -11,6 +11,7 @@ import Combine
 
 enum PlayerState {
     case playing
+    case loading
     case stopped
 }
 
@@ -51,9 +52,25 @@ final class Delegate: NSObject {
             .sink { status in
                 switch status {
                 case .readyToPlay:
-                    continuation.yield(.playing)
-                case .failed, .unknown:
+                    continuation.yield(.loading)
+                case .failed:
                     continuation.yield(.stopped)
+                case .unknown:
+                    continuation.yield(.loading)
+                @unknown default:
+                    break
+                }
+            }
+            .store(in: &cancellables)
+        
+        player.publisher(for: \.timeControlStatus)
+            .sink { status in
+                switch status {
+                case .playing:
+                    continuation.yield(.playing)
+                case .waitingToPlayAtSpecifiedRate:
+                    continuation.yield(.loading)
+                case .paused:
                     continuation.yield(.stopped)
                 @unknown default:
                     break

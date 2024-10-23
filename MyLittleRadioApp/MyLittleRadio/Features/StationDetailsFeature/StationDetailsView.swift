@@ -29,6 +29,11 @@ struct StationDetailsView: View {
                 .shadow(radius: 5)
                 
                 stationTitleView()
+                if store.mode.is(\.loading) {
+                    ProgressView()
+                        .controlSize(.large)
+                        .tint(Color(hex: store.station.colors.primary))
+                }
                 Spacer()
                 playerView()
             }

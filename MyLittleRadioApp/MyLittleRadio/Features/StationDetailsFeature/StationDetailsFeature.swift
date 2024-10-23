@@ -24,8 +24,9 @@ struct StationDetailsFeature {
     @CasePathable
     @dynamicMemberLookup
     enum Mode: Equatable {
-      case notPlaying
-      case playing
+        case notPlaying
+        case playing
+        case loading
     }
 
     
@@ -41,6 +42,8 @@ struct StationDetailsFeature {
                     state.mode = .playing
                 case .stopped:
                     state.mode = .notPlaying
+                case .loading:
+                    state.mode = .loading
                 }
                 return .none
             case .playPauseButtonTapped:
@@ -60,6 +63,8 @@ struct StationDetailsFeature {
                         },
                         .cancel(id: CancelID.play)
                         )
+                case .loading:
+                    return .none
                 }
             }
         }
