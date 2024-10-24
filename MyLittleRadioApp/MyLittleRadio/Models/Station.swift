@@ -2,6 +2,10 @@
 
 import Foundation
 
+struct StationsList: Codable {
+    let stations: [Station]
+}
+
 struct Station: Codable, Equatable, Identifiable {
     
     struct Analytics: Codable {
