@@ -1,101 +1,50 @@
-# Technical Test - My Little Radio
+# MyLittleRadio Test Project With TCA
 
-&#x20;This project is built with **SwiftUI** and **The Composable Architecture (TCA)**. We understand that TCA might not be familiar to all candidates, so we have provided a basic application skeleton to help you get started.
+## Overview
+This README outlines the changes made in the project, detailing the skill development undertaken with the Swift Composable Architecture (TCA). It also highlights the decisions and trade-offs encountered during the implementation.
 
-## Project Overview
+## Skills Development on TCA Architecture
+To successfully implement the project, I engaged in skills development focused on the Swift Composable Architecture (TCA) using the following references:
 
-The project consists of:
+### References
+- [Swift Composable Architecture Tutorial](https://pointfreeco.github.io/swift-composable-architecture/main/tutorials/meetcomposablearchitecture)
+- [Swift Composable Architecture GitHub Repository](https://github.com/pointfreeco/swift-composable-architecture)
 
-1. **SwiftUI Application**: The initial app displays a list of radio stations without any specific design. This list is managed by a **Reducer** and uses a mock data dependency provided via TCA's **dependencies** module.
+## Features Implemented
 
-2. **Mock Server**: We have included a simple Node.js server that exposes a list of radio stations. The server can be started to serve data from `http://localhost:3000/stations`.
+- **API Call Management**: Replaced mock data with server API calls and refactored the `ApiManager` class for improved testability.
+  
+- **Station List View Development**: Created a view that displays a list of stations with the following features:
+  - A loading indicator while fetching the stations list.
+  - An alert shown in case of an API call failure, providing an option to retry the request.
 
-The goal of this test is to assess your ability to enhance an existing SwiftUI application using TCA principles, improve the UI, and add meaningful features.
+- **Station Cell Information**:
+  - Station image; if unavailable, a placeholder with the station's short title is displayed.
+  - Title of the station.
+  - An icon to differentiate between music and non-music stations.
+  - On tapping a station, a details page of the selected station is pushed to the navigation stack.
 
-## JSON Data Format
+- **Station Detail Page**: Developed the station detail page and its corresponding `StationDetailsFeature` following TCA principles, including:
+  - Station image.
+  - Station title.
+  - A play button to initiate playback of the station.
+  - A loader that appears while the audio stream is loading.
+  - An animation displayed during radio playback.
+  - A custom back button that returns to the station list page and stops the player.
 
-The data from the Node.js server is structured in the following format:
+- **Player Client**: Created a player client as a dependency to isolate player-related logic and adhere to TCA architecture.
 
-```
-{
-  "stations": [
-    {
-      "id": "7",
-      "brandId": "FIP",
-      "title": "FIP",
-      "hasTimeshift": false,
-      "shortTitle": "Fip",
-      "type": "on_air",
-      "streamUrl": "https://icecast.radiofrance.fr/fip-midfi.mp3",
-      "analytics": {
-        "value": "fip",
-        "stationAudienceId": 7
-      },
-      "liveRule": "apprf_fip_player",
-      "colors": {
-        "primary": "#e2007a"
-      },
-      "assets": {
-        "squareImageUrl": "https://www.radiofrance.fr/s3/cruiser-production/2022/05/a174aea6-c3f3-4a48-a42c-ebc034f62c10/1000x1000_squareimage_fip_v2.jpg"
-      },
-      "isMusical": true
-    },
-    ...
-  ]
-}
-```
+- **Unit Testing**: Implemented unit tests for both `StationsFeature` and `StationDetailsFeature`, as well as for the `ApiManager` dependency.
 
-## Requirements
+## Trade-offs / Decisions
 
-We'd like you to enhance the project with the following features:
+- **Stopping the Player on Back from the Detail Page**: Evaluated three potential solutions:
+  1. Stop the player after the playback effect completes by calling the player's stop method.
+  2. In the view's `onDisappear` method, create a `Task` that injects the player client dependecy and calls stop.
+  3. Create a custom back button that, upon tap, invokes an action in the reducer to stop the player. **→ Solution Implemented**
 
-1. **Replace Mock Data with Server Call**
+## Tasks Not Completed Due to Time Limitations
 
-   - Replace the mock station data with a network call to the Node.js server at `http://localhost:3000/stations` to fetch the list of stations.
-
-2. **Navigation to Station Details Page**
-
-   - When a user clicks on a station in the list, they should be navigated to a details page for that station.
-   - The detail page should be implemented in accordance with the existing architecture (using TCA's Reducer and View principles).
-
-3. **Play Station Stream**
-
-   - Add functionality to allow users to play the stream of a selected station.
-   - This should be integrated in the details page and respect TCA's architecture.
-
-4. **Improved User Interface**
-
-   - Enhance the overall look and feel of the application using **SwiftUI**.
-   - Feel free to use animations, custom components, or anything that can improve the user experience.
-
-## Getting Started
-
-1. **Fork the Repository**
-
-   - Fork the project repository from the provided URL.
-
-2. **Run the Mock Server**
-
-   - Navigate to the `server` folder.
-   - Run `npm install` to install the necessary dependencies.
-   - Start the server with `node server.js`.
-
-3. **Run the iOS Project**
-
-   - Open the Xcode project.
-   - Trust and enable the macros for the TCA and Dependencies libraries to ensure proper functionality.
-   - The app should be able to run and display a list of mock stations generated locally.
-
-## Submission Guidelines
-
-- Fork the repository and make your changes.
-- Please include a README file detailing the changes you've made, including any decisions or trade-offs you encountered you've made and any decisions or trade-offs you faced.
-
-## Evaluation Criteria
-
-- **Architecture**: How well you respect and extend the existing TCA architecture.
-- **Code Quality**: Readability, organization, and use of best practices.
-- **Functionality**: Successful implementation of the requested features.
-- **User Interface**: Design quality and overall user experience.
-
-Feel free to ask questions if anything is unclear. Good luck, and happy coding!
+- Refactor and implement unit tests for the player manager (similar to what was done for the API manager).
+- Develop advanced player functionalities such as pause and time-shifting for supported stations.
+- Silence runtime warnings: `Perceptible state was accessed but is not being tracked`.
