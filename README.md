@@ -21,6 +21,7 @@ To successfully implement the project, I engaged in skills development focused o
 - **Station Cell Information**:
   - Station image; if unavailable, a placeholder with the station's short title is displayed.
   - Title of the station.
+  - Animation indicating the the stations is being played.
   - An icon to differentiate between music and non-music stations.
   - On tapping a station, a details page of the selected station is pushed to the navigation stack.
 
@@ -36,15 +37,15 @@ To successfully implement the project, I engaged in skills development focused o
 
 - **Unit Testing**: Implemented unit tests for both `StationsFeature` and `StationDetailsFeature`, as well as for the `ApiManager` dependency.
 
-## Trade-offs / Decisions
+## Decisions
 
-- **Stopping the Player on Back from the Detail Page**: Evaluated three potential solutions:
-  1. Stop the player after the playback effect completes by calling the player's stop method.
-  2. In the view's `onDisappear` method, create a `Task` that injects the player client dependecy and calls stop.
-  3. Create a custom back button that, upon tap, invokes an action in the reducer to stop the player. **→ Solution Implemented**
+- **Stopping the Player on Back from the Detail Page**:
+- A decision was made to keep the player active on the stations list view and indicate the currently playing station in its corresponding cell.
 
-## Tasks Not Completed Due to Time Limitations
+## Planned Tasks Not Achieved Due to Time Limitations
 
 - Refactor and implement unit tests for the player manager (similar to what was done for the API manager).
 - Develop advanced player functionalities such as pause and time-shifting for supported stations.
 - Silence runtime warnings: `Perceptible state was accessed but is not being tracked`.
+- Handle player manager errors.
+- Etc...
