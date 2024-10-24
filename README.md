@@ -40,7 +40,7 @@ To successfully implement the project, I engaged in skills development focused o
 ## Decisions
 
 - **Stopping the Player on Back from the Detail Page**:
-- A decision was made to keep the player active on the stations list view and indicate the currently playing station in its corresponding cell.
+  - A decision was made to keep the player active on the stations list view and indicate the currently playing station in its corresponding cell.
 
 ## Planned Tasks Not Achieved Due to Time Limitations
 
