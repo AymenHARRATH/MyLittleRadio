@@ -12,6 +12,7 @@ import ComposableArchitecture
 struct StationDetailsView: View {
     
     @Perception.Bindable private var store: StoreOf<StationDetailsFeature>
+    @Environment(\.dismiss) var dismiss
 
     init(store: StoreOf<StationDetailsFeature>) {
         self.store = store
@@ -19,10 +20,11 @@ struct StationDetailsView: View {
 
     var body: some View {
         WithPerceptionTracking {
+            let color = Color(hex: store.station.colors.primary)
             VStack {
                 StationCoverImageView(
                     squareImageUrl: store.station.assets?.squareImageUrl,
-                    color: Color(hex: store.station.colors.primary),
+                    color: color,
                     text: store.station.shortTitle
                 )
                 .frame(width: 200, height: 200)
@@ -32,7 +34,7 @@ struct StationDetailsView: View {
                 if store.mode.is(\.loading) {
                     ProgressView()
                         .controlSize(.large)
-                        .tint(Color(hex: store.station.colors.primary))
+                        .tint(color)
                 }
                 Spacer()
                 playerView()
@@ -42,6 +44,19 @@ struct StationDetailsView: View {
             .background(
                 gradient()
             )
+            .navigationTitle("")
+                    .navigationBarBackButtonHidden(true)
+                    .toolbar {
+                        ToolbarItem(placement: .navigationBarLeading) {
+                            Button(action: {
+                                store.send(.backButtonTapped)
+                                dismiss()
+                            }) {
+                                Image(systemName: "arrow.left")
+                            }
+                        }
+                    }
+                    .tint(color)
         }
     }
 }

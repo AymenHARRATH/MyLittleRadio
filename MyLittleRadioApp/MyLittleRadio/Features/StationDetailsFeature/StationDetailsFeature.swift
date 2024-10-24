@@ -19,6 +19,7 @@ struct StationDetailsFeature {
     enum Action {
         case playerClient(PlayerState)
         case playPauseButtonTapped
+        case backButtonTapped
     }
     
     @CasePathable
@@ -65,6 +66,10 @@ struct StationDetailsFeature {
                     )
                 case .loading:
                     return .none
+                }
+            case .backButtonTapped:
+                return .run { send in
+                    await player.stop()
                 }
             }
         }
