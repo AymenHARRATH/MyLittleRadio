@@ -11,6 +11,7 @@ struct StationsFeature {
         var path = StackState<StationDetailsFeature.State>()
         @Presents var alert: AlertState<Action.Alert>?
         var isLoading: Bool = false
+        var playingStation: Station? = nil
     }
 
     enum Action {
@@ -25,6 +26,8 @@ struct StationsFeature {
         case fetchStationsFailure
         case alert(PresentationAction<Alert>)
         
+        case updatePlayerState(PlayerState)
+        
         case task
     }
 
@@ -32,6 +35,8 @@ struct StationsFeature {
 
     @Dependency(\.apiClient)
     private var apiClient
+    @Dependency(\.player)
+    private var player
 
     var body: some ReducerOf<Self> {
         Reduce<State, Action> { state, action in
@@ -53,11 +58,23 @@ struct StationsFeature {
                 state.isLoading = true
                 return .run { send in
                     await send(.fetchStations)
+                    for await playerState in await player.playerStateObserver() {
+                        await send(.updatePlayerState(playerState))
+                    }
                 }
                 
             case .path:
                 return .none
                 
+            case let .updatePlayerState(playerState):
+                if playerState.isPlaying {
+                    state.playingStation = state.stations.first {
+                        $0.streamUrl == playerState.playingURL
+                    }
+                } else if playerState.isStopped {
+                    state.playingStation = nil
+                }
+                return .none
             case .fetchStationsFailure:
                 state.isLoading = false
                 state.alert = .fechStationsFailureState()

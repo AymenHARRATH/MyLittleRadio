@@ -22,11 +22,12 @@ struct StationDetailsFeatureTests {
         //Given
         let playerStateStream = AsyncStream.makeStream(of: PlayerState.self)
         
-        let store = TestStore(initialState: StationDetailsFeature.State(station: Station.sample)) {
+        let store = TestStore(initialState: StationDetailsFeature.State(station: Station.sample, mode: .notPlaying)) {
             StationDetailsFeature()
         } withDependencies: {
-            $0.player.play =  { @Sendable _ in
-                playerStateStream.continuation.yield(.playing)
+            $0.player.play = { @Sendable _ in }
+            $0.player.playerStateObserver = {
+                playerStateStream.continuation.yield(.init(status: .playing))
                 playerStateStream.continuation.finish()
                 return playerStateStream.stream
               }
@@ -43,12 +44,13 @@ struct StationDetailsFeatureTests {
     func play_action_should_set_state_to_loading_when_player_is_loading() async throws {
         //Given
         let playerStateStream = AsyncStream.makeStream(of: PlayerState.self)
-        let state = StationDetailsFeature.State(station: Station.sample)
+        let state = StationDetailsFeature.State(station: Station.sample, mode: .notPlaying)
         let store = TestStore(initialState: state) {
             StationDetailsFeature()
         } withDependencies: {
-            $0.player.play =  { @Sendable _ in
-                playerStateStream.continuation.yield(.loading)
+            $0.player.play = { @Sendable _ in }
+            $0.player.playerStateObserver = {
+                playerStateStream.continuation.yield(.init(status: .loading))
                 playerStateStream.continuation.finish()
                 return playerStateStream.stream
               }
@@ -70,7 +72,7 @@ struct StationDetailsFeatureTests {
             StationDetailsFeature()
         } withDependencies: {
             $0.player.stop =  {
-                playerStateStream.continuation.yield(.stopped)
+                playerStateStream.continuation.yield(.init(status: .stopped))
               }
         }
         //when

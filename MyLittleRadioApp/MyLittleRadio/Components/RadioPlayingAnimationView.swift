@@ -10,18 +10,23 @@ struct RadioPlayingAnimationView: View {
 
     @State private var isPlaying: Bool = false
     private var color: Color
-    private var duration = 0.5
-    private var barsHeight: CGFloat = 120
+    private var duration: Double
+    private var barsHeight: CGFloat
+    private var numberOfBars: Int
 
-    init(color: Color, duration: Double = 0.5, barsHeight: CGFloat = 120) {
+    init(color: Color,
+         duration: Double = 0.5,
+         barsHeight: CGFloat = 120,
+         numberOfBars: Int = 100) {
         self.color = color
         self.duration = duration
         self.barsHeight = barsHeight
+        self.numberOfBars = numberOfBars
     }
     
     var body: some View {
         HStack {
-            ForEach(0..<100) { _ in
+            ForEach(0..<numberOfBars, id: \.self) { _ in
                 let speed = Double.random(in: 0.5...1.5)
                 bar(fraction: CGFloat.random(in: 0.2...0.6))
                     .animation(

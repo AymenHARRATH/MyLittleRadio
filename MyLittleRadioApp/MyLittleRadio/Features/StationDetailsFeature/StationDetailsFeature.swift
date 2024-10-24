@@ -13,13 +13,12 @@ struct StationDetailsFeature {
     @ObservableState
     struct State: Equatable {
         let station: Station
-        var mode = Mode.notPlaying
+        var mode: Mode
     }
 
     enum Action {
         case updatePlayerState(PlayerState)
         case playPauseButtonTapped
-        case backButtonTapped
     }
     
     @CasePathable
@@ -38,7 +37,7 @@ struct StationDetailsFeature {
         Reduce<State, Action> { state, action in
             switch action {
             case let .updatePlayerState(playerState):
-                switch playerState {
+                switch playerState.status {
                 case .playing:
                     state.mode = .playing
                 case .stopped:
@@ -51,7 +50,8 @@ struct StationDetailsFeature {
                 switch state.mode {
                 case .notPlaying:
                     return .run { [url = state.station.streamUrl] send in
-                        for await playerState in await player.play(url: url) {
+                        try await player.play(url: url)
+                        for await playerState in await player.playerStateObserver() {
                             await send(.updatePlayerState(playerState))
                         }
                     }
@@ -60,16 +60,12 @@ struct StationDetailsFeature {
                     return .merge (
                         .run { send in
                             await player.stop()
-                            await send(.updatePlayerState(.stopped))
+                            await send(.updatePlayerState(.init(status: .stopped)))
                         },
                         .cancel(id: CancelID.play)
                     )
                 case .loading:
                     return .none
-                }
-            case .backButtonTapped:
-                return .run { send in
-                    await player.stop()
                 }
             }
         }

@@ -12,7 +12,6 @@ import ComposableArchitecture
 struct StationDetailsView: View {
     
     @Perception.Bindable private var store: StoreOf<StationDetailsFeature>
-    @Environment(\.dismiss) var dismiss
 
     init(store: StoreOf<StationDetailsFeature>) {
         self.store = store
@@ -44,19 +43,6 @@ struct StationDetailsView: View {
             .background(
                 gradient()
             )
-            .navigationTitle("")
-                    .navigationBarBackButtonHidden(true)
-                    .toolbar {
-                        ToolbarItem(placement: .navigationBarLeading) {
-                            Button(action: {
-                                store.send(.backButtonTapped)
-                                dismiss()
-                            }) {
-                                Image(systemName: "arrow.left")
-                            }
-                        }
-                    }
-                    .tint(color)
         }
     }
 }
@@ -100,7 +86,8 @@ private extension StationDetailsView {
 }
 
 #Preview {
-    let store = Store(initialState: StationDetailsFeature.State(station: Station.sample)) {
+    let store = Store(initialState: StationDetailsFeature.State(station: Station.sample,
+                                                                mode: .playing)) {
         StationDetailsFeature()
     }
     StationDetailsView(store: store)

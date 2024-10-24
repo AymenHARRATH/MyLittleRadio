@@ -9,32 +9,46 @@ import Foundation
 import AVFoundation
 import Combine
 
-enum PlayerState {
-    case playing
-    case loading
-    case stopped
+struct PlayerState {
+    enum Status {
+        case playing
+        case loading
+        case stopped
+    }
+    var status: Status = .stopped
+    var playingURL: String?
+    
+    init(status: Status, playingURL: String? = nil) {
+        self.status = status
+        self.playingURL = playingURL
+    }
+    
+    var isPlaying: Bool {
+        status == .playing
+    }
+    var isStopped: Bool {
+        status == .stopped
+    }
 }
 
 final class PlayerManager {
     private var delegate: Delegate?
-    
-    func play(url: String) async -> AsyncStream<PlayerState> {
-        
+    func play(url: String) async throws {
         guard let url = URL(string: url) else {
-            return .finished
+            throw(URLError(.badURL))
         }
-        
-        return AsyncStream<PlayerState> { continuation in
-            delegate = Delegate(
-                url: url,
-                continuation: continuation
-            )
-            delegate?.play()
-        }
+        delegate = Delegate(url: url)
+        delegate?.play()
     }
     
     func stop() async {
         delegate?.stop()
+    }
+    
+    func playerState() async -> AsyncStream<PlayerState> {
+        .init {
+            delegate?.observePlayerState($0)
+        }
     }
 }
 
@@ -43,20 +57,24 @@ final class Delegate {
     private var player: AVPlayer?
     private var playerItem: AVPlayerItem?
     private var cancellables = Set<AnyCancellable>()
+    private(set) var url: URL
     
-    init(url: URL, continuation: AsyncStream<PlayerState>.Continuation) {
+    init(url: URL) {
+        self.url = url
         playerItem = AVPlayerItem(url: url)
         player = AVPlayer(playerItem: playerItem)
-
+    }
+    
+    func observePlayerState(_ continuation: AsyncStream<PlayerState>.Continuation) {
         playerItem?.publisher(for: \.status)
-            .sink { status in
+            .sink { [weak self] status in
                 switch status {
                 case .readyToPlay:
-                    continuation.yield(.loading)
+                    continuation.yield(.init(status: .loading, playingURL: self?.url.absoluteString))
                 case .failed:
-                    continuation.yield(.stopped)
+                    continuation.yield(.init(status: .stopped, playingURL: self?.url.absoluteString))
                 case .unknown:
-                    continuation.yield(.loading)
+                    continuation.yield(.init(status: .loading, playingURL: self?.url.absoluteString))
                 @unknown default:
                     break
                 }
@@ -64,14 +82,14 @@ final class Delegate {
             .store(in: &cancellables)
         
         player?.publisher(for: \.timeControlStatus)
-            .sink { status in
+            .sink { [weak self] status in
                 switch status {
                 case .playing:
-                    continuation.yield(.playing)
+                    continuation.yield(.init(status: .playing, playingURL: self?.url.absoluteString))
                 case .waitingToPlayAtSpecifiedRate:
-                    continuation.yield(.loading)
+                    continuation.yield(.init(status: .loading, playingURL: self?.url.absoluteString))
                 case .paused:
-                    continuation.yield(.stopped)
+                    continuation.yield(.init(status: .stopped, playingURL: self?.url.absoluteString))
                 @unknown default:
                     break
                 }
@@ -79,9 +97,9 @@ final class Delegate {
             .store(in: &cancellables)
         
         player?.publisher(for: \.rate)
-            .sink { rate in
+            .sink { [weak self] rate in
                 if rate == 0 {
-                    continuation.yield(.stopped)
+                    continuation.yield(.init(status: .stopped, playingURL: self?.url.absoluteString))
                 }
             }
             .store(in: &cancellables)

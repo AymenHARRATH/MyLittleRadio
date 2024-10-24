@@ -18,7 +18,9 @@ extension PlayerClient: DependencyKey {
     public static let liveValue: Self = {
         let manager = PlayerManager()
         return Self { url in
-            await manager.play(url: url)
+            try await manager.play(url: url)
+        } playerStateObserver: {
+            await manager.playerState()
         } stop: {
             await manager.stop()
         }

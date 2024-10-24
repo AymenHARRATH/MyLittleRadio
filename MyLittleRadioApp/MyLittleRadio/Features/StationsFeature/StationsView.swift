@@ -46,7 +46,8 @@ private extension StationsView {
     @ViewBuilder
     func stationCell(_ station: Station) -> some View {
         let color = Color(hex: station.colors.primary)
-        NavigationLink(state: StationDetailsFeature.State(station: station)) {
+        let mode: StationDetailsFeature.Mode = store.playingStation == station  ? .playing : .notPlaying
+        NavigationLink(state: StationDetailsFeature.State(station: station, mode: mode)) {
             ZStack {
                 RoundedRectangle(cornerRadius: 12)
                     .fill(Color.white)
@@ -62,7 +63,14 @@ private extension StationsView {
                         .foregroundColor(color)
                     
                     Spacer()
-                    
+                    if store.playingStation == station {
+                        RadioPlayingAnimationView(color: color,
+                                                  duration: 0.3,
+                                                  barsHeight: 30,
+                                                  numberOfBars: 6)
+                            .frame(width: 40, height: 30)
+                            .padding([.bottom, .trailing], 10)
+                    }
                     Text(station.isMusical ? "🎵" : "🎙")
                     Image(systemName: "chevron.right")
                         .tint(color)
@@ -70,14 +78,13 @@ private extension StationsView {
                 .padding(16)
             }
             .padding(.horizontal)
-            .frame(height: 70)
         }
     }
 }
 
 #if DEBUG
 #Preview {
-    let store = Store(initialState: StationsFeature.State()) {
+    let store = Store(initialState: StationsFeature.State(playingStation: Station.sample)) {
         StationsFeature()
     }
     StationsView(store: store)
