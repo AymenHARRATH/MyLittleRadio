@@ -29,7 +29,7 @@ final class ApiManagerTests: XCTestCase {
     }
 
     
-    func test_fech_station_should_retur_array_of_stations_when_succeeded() async {
+    func test_fetch_station_should_retur_array_of_stations_when_succeeded() async {
         //Given
         let station = Station.sample
         let stationsList = StationsList(stations: [station])
@@ -43,29 +43,37 @@ final class ApiManagerTests: XCTestCase {
         XCTAssertEqual(stations.first?.title, Station.sample.title)
     }
     
-    func test_fech_stations_should_throw_error_when_failed() async {
+    func test_fetch_stations_should_throw_error_when_failed() async {
         // Given
         mockSession.error = URLError(.badServerResponse)
         
-        //When + Then
+        // When + Then
         do {
             _ = try await sut.fetchStations()
             XCTFail("Expected fetchStations error to be thrown")
         } catch {
-            XCTAssertTrue(error is URLError)
+            if case let APIError.networkError(networkError) = error {
+                XCTAssertTrue(networkError is URLError, "Expected URLError but got \(networkError)")
+            } else {
+                XCTFail("Expected APIError.networkError but got \(error)")
+            }
         }
     }
-    
-    func test_fech_stations_should_throw_error_when_decoding_failed() async {
+
+    func test_fetch_stations_should_throw_error_when_decoding_failed() async {
         // Given
         mockSession.data = Data("Fake JSON".utf8)
-
-        //When + Then
+        
+        // When + Then
         do {
             _ = try await sut.fetchStations()
             XCTFail("Expected decoding error to be thrown")
         } catch {
-            XCTAssertTrue(error is DecodingError, "Invalid json data \(error).")
+            if case let APIError.decodingError(decodingError) = error {
+                XCTAssertTrue(decodingError is DecodingError, "Expected DecodingError but got \(decodingError)")
+            } else {
+                XCTFail("Expected APIError.decodingError but got \(error)")
+            }
         }
     }
 }

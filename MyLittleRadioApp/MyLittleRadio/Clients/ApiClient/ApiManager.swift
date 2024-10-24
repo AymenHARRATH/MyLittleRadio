@@ -2,6 +2,26 @@
 
 import Foundation
 
+enum APIError: Error, LocalizedError {
+    case invalidURL
+    case networkError(Error)
+    case decodingError(Error)
+    case unknownError
+
+    var errorDescription: String? {
+        switch self {
+        case .invalidURL:
+            return "L'URL est invalide."
+        case .networkError(let error):
+            return "Une erreur réseau est survenue : \(error.localizedDescription)"
+        case .decodingError(let error):
+            return "Échec du décodage de la réponse : \(error.localizedDescription)"
+        case .unknownError:
+            return "Une erreur inconnue est survenue."
+        }
+    }
+}
+
 final class ApiManager {
     
     private let session: URLSessionProtocol
@@ -15,13 +35,21 @@ final class ApiManager {
 
     func fetchStations() async throws -> [Station] {
         do {
-            guard let url = APIEndpoint.stations.url else { throw URLError(.badURL) }
+            guard let url = APIEndpoint.stations.url else {
+                throw APIError.invalidURL
+            }
             let (data, _) = try await session.getData(from: url)
             let decodedData = try decoder.decode(StationsList.self, from: data)
             return decodedData.stations
         }
+        catch let urlError as URLError {
+            throw APIError.networkError(urlError)
+        }
+        catch let decodingError as DecodingError {
+            throw APIError.decodingError(decodingError)
+        }
         catch {
-            throw error
+            throw APIError.unknownError
         }
     }
 }

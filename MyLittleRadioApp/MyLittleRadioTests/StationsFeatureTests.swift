@@ -37,13 +37,10 @@ struct StationsFeatureTests {
     @Test
     func fech_stations_should_set_state_alert_when_failed() async {
         //Given
-        enum TestError: Error {
-            case someError
-        }
         let store = TestStore(initialState: StationsFeature.State()) {
             StationsFeature()
         } withDependencies: {
-            $0.apiClient.fetchStations = { throw TestError.someError }
+            $0.apiClient.fetchStations = { throw APIError.unknownError }
         }
         
         //When
@@ -51,7 +48,7 @@ struct StationsFeatureTests {
         
         //Then
         await store.receive(\.fetchStationsFailure) {
-            $0.alert = .fechStationsFailureState()
+            $0.alert = .fechStationsFailureState(APIError.unknownError)
         }
     }
     
@@ -59,7 +56,7 @@ struct StationsFeatureTests {
     @Test
     func alert_retry_action_should_retry_fech_stations_request() async {
         //Given
-        let store = TestStore(initialState: StationsFeature.State(alert: .fechStationsFailureState())) {
+        let store = TestStore(initialState: StationsFeature.State(alert: .fechStationsFailureState(APIError.unknownError))) {
             StationsFeature()
         } withDependencies: {
             $0.apiClient.fetchStations = { [Station.sample] }

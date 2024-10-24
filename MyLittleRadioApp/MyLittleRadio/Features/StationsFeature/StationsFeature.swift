@@ -23,7 +23,7 @@ struct StationsFeature {
         enum Alert: Equatable {
             case retryRequest
         }
-        case fetchStationsFailure
+        case fetchStationsFailure(Error)
         case alert(PresentationAction<Alert>)
         
         case updatePlayerState(PlayerState)
@@ -46,7 +46,7 @@ struct StationsFeature {
                     let stations = try await apiClient.fetchStations()
                     await send(.setStations(stations))
                 } catch: { error, send in
-                    await send(.fetchStationsFailure)
+                    await send(.fetchStationsFailure(error))
                 }
                 
             case let .setStations(stations):
@@ -75,9 +75,9 @@ struct StationsFeature {
                     state.playingStation = nil
                 }
                 return .none
-            case .fetchStationsFailure:
+            case let .fetchStationsFailure(error):
                 state.isLoading = false
-                state.alert = .fechStationsFailureState()
+                state.alert = .fechStationsFailureState(error)
                 return .none
                 
             case .alert(.presented(.retryRequest)):
@@ -97,9 +97,10 @@ struct StationsFeature {
 }
 
 extension AlertState where Action == StationsFeature.Action.Alert {
-  static func fechStationsFailureState() -> Self {
+    static func fechStationsFailureState(_ error: Error) -> Self {
     Self  {
-        TextState("Une erreur est survenue lors de la récupération des stations radio. \n Voulez-vous réessayer?")
+        let message = (error as? APIError)?.localizedDescription ?? "Une erreur est survenue lors de la récupération des stations radio. \n Voulez-vous réessayer?"
+        return TextState(message)
       } actions: {
           ButtonState(action: .retryRequest) {
           TextState("Réessayer")
