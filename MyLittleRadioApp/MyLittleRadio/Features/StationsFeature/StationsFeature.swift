@@ -56,16 +56,7 @@ struct StationsFeature {
                 return .none
                 
             case .fetchStationsFailure:
-                state.alert = AlertState {
-                  TextState("Une erreur est survenue lors de la récupération des stations radio. \n Voulez-vous réessayer?")
-                } actions: {
-                    ButtonState(action: .retryRequest) {
-                    TextState("Réessayer")
-                  }
-                    ButtonState(role: .cancel) {
-                        TextState("Annuler")
-                    }
-                }
+                state.alert = .fechStationsFailureState()
                 return .none
                 
             case .alert(.presented(.retryRequest)):
@@ -83,3 +74,19 @@ struct StationsFeature {
         .ifLet(\.$alert, action: \.alert)
     }
 }
+
+extension AlertState where Action == StationsFeature.Action.Alert {
+  static func fechStationsFailureState() -> Self {
+    Self  {
+        TextState("Une erreur est survenue lors de la récupération des stations radio. \n Voulez-vous réessayer?")
+      } actions: {
+          ButtonState(action: .retryRequest) {
+          TextState("Réessayer")
+        }
+          ButtonState(role: .cancel) {
+              TextState("Annuler")
+          }
+      }
+  }
+}
+
