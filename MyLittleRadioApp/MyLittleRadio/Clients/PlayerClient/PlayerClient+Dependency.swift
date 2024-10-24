@@ -19,8 +19,8 @@ extension PlayerClient: DependencyKey {
         let manager = PlayerManager()
         return Self { url in
             await manager.play(url: url)
-        } pause: {
-            await manager.pause()
+        } stop: {
+            await manager.stop()
         }
     }()
 }

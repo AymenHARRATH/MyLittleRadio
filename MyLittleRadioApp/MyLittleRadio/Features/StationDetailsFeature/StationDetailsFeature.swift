@@ -58,11 +58,11 @@ struct StationDetailsFeature {
                 case .playing:
                     return .merge (
                         .run { send in
-                            await player.pause()
+                            await player.stop()
                             await send(.playerClient(.stopped))
                         },
                         .cancel(id: CancelID.play)
-                        )
+                    )
                 case .loading:
                     return .none
                 }

@@ -69,7 +69,7 @@ struct StationDetailsFeatureTests {
         let store = TestStore(initialState: state) {
             StationDetailsFeature()
         } withDependencies: {
-            $0.player.pause =  {
+            $0.player.stop =  {
                 playerStateStream.continuation.yield(.stopped)
               }
         }
