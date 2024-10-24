@@ -14,17 +14,25 @@ struct StationsView: View {
 
     var body: some View {
         WithPerceptionTracking {
-            NavigationStack(path: $store.scope(state: \.path, action: \.path)) {
-                ScrollView {
-                    LazyVStack(alignment: .leading) {
-                        ForEach(store.stations) { station in
-                            stationCell(station)
+            ZStack {
+                NavigationStack(path: $store.scope(state: \.path, action: \.path))
+                {
+                    ScrollView {
+                        LazyVStack(alignment: .leading) {
+                            ForEach(store.stations) { station in
+                                stationCell(station)
+                            }
                         }
                     }
+                    .navigationTitle("Radios")
+                } destination: { store in
+                    StationDetailsView(store: store)
                 }
-                .navigationTitle("Radios")
-            } destination: { store in
-                StationDetailsView(store: store)
+                
+                if store.isLoading {
+                    ProgressView()
+                        .controlSize(.large)
+                }
             }
         }
         .task {

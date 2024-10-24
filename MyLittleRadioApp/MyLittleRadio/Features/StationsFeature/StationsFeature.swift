@@ -10,6 +10,7 @@ struct StationsFeature {
         var stations: [Station] = []
         var path = StackState<StationDetailsFeature.State>()
         @Presents var alert: AlertState<Action.Alert>?
+        var isLoading: Bool = false
     }
 
     enum Action {
@@ -44,10 +45,12 @@ struct StationsFeature {
                 }
                 
             case let .setStations(stations):
+                state.isLoading = false
                 state.stations = stations
                 return .none
                 
             case .task:
+                state.isLoading = true
                 return .run { send in
                     await send(.fetchStations)
                 }
@@ -56,6 +59,7 @@ struct StationsFeature {
                 return .none
                 
             case .fetchStationsFailure:
+                state.isLoading = false
                 state.alert = .fechStationsFailureState()
                 return .none
                 
