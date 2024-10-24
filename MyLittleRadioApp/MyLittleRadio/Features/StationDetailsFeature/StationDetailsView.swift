@@ -30,11 +30,6 @@ struct StationDetailsView: View {
                 .shadow(radius: 5)
                 
                 stationTitleView()
-                if store.mode.is(\.loading) {
-                    ProgressView()
-                        .controlSize(.large)
-                        .tint(color)
-                }
                 Spacer()
                 playerView()
             }
@@ -59,20 +54,41 @@ private extension StationDetailsView {
     
     @ViewBuilder
     func playerView() -> some View {
+        let color = Color(hex: store.station.colors.primary)
         VStack {
             if store.mode.is(\.playing) {
-                RadioPlayingAnimationView(color: Color(hex: store.station.colors.primary).opacity(0.3))
+                RadioPlayingAnimationView(color: color.opacity(0.3))
             }
-            Button(action: {
-                store.send(.playPauseButtonTapped)
-            }) {
-                Image(systemName: store.mode.is(\.playing) ? "stop.circle.fill" : "play.circle.fill")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 100, height: 100)
+            ZStack {
+                Button(action: {
+                    store.send(.playPauseButtonTapped)
+                }) {
+                    playerButtonImage()
+                }
+                .tint(.white)
+                if store.mode.is(\.loading) {
+                    ProgressView()
+                        .controlSize(.large)
+                        .tint(color)
+                }
             }
-            .tint(.white)
         }
+    }
+    
+    private func playerButtonImage() -> some View {
+        let image: String
+        switch store.mode {
+        case .playing:
+            image = "stop.circle.fill"
+        case .loading:
+            image = "circle.fill"
+        case .notPlaying:
+            image = "play.circle.fill"
+        }
+        return Image(systemName: image)
+            .resizable()
+            .aspectRatio(contentMode: .fit)
+            .frame(width: 100, height: 100)
     }
     
     func gradient() -> some View {
