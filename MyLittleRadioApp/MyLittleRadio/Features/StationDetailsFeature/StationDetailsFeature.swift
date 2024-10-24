@@ -17,7 +17,7 @@ struct StationDetailsFeature {
     }
 
     enum Action {
-        case playerClient(PlayerState)
+        case updatePlayerState(PlayerState)
         case playPauseButtonTapped
         case backButtonTapped
     }
@@ -37,7 +37,7 @@ struct StationDetailsFeature {
     var body: some ReducerOf<Self> {
         Reduce<State, Action> { state, action in
             switch action {
-            case let .playerClient(playerState):
+            case let .updatePlayerState(playerState):
                 switch playerState {
                 case .playing:
                     state.mode = .playing
@@ -52,7 +52,7 @@ struct StationDetailsFeature {
                 case .notPlaying:
                     return .run { [url = state.station.streamUrl] send in
                         for await playerState in await player.play(url: url) {
-                            await send(.playerClient(playerState))
+                            await send(.updatePlayerState(playerState))
                         }
                     }
                     .cancellable(id: CancelID.play, cancelInFlight: true)
@@ -60,7 +60,7 @@ struct StationDetailsFeature {
                     return .merge (
                         .run { send in
                             await player.stop()
-                            await send(.playerClient(.stopped))
+                            await send(.updatePlayerState(.stopped))
                         },
                         .cancel(id: CancelID.play)
                     )

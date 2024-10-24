@@ -34,7 +34,7 @@ struct StationDetailsFeatureTests {
         //When
         await store.send(.playPauseButtonTapped)
         //Then
-        await store.receive(\.playerClient) {
+        await store.receive(\.updatePlayerState) {
             $0.mode = .playing
         }
     }
@@ -56,7 +56,7 @@ struct StationDetailsFeatureTests {
         //When
         await store.send(.playPauseButtonTapped)
         //Then
-        await store.receive(\.playerClient) {
+        await store.receive(\.updatePlayerState) {
             $0.mode = .loading
         }
     }
@@ -76,7 +76,7 @@ struct StationDetailsFeatureTests {
         //when
         await store.send(.playPauseButtonTapped)
         //Then
-        await store.receive(\.playerClient) {
+        await store.receive(\.updatePlayerState) {
             $0.mode = .notPlaying
         }
     }
